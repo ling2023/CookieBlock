@@ -8,6 +8,13 @@ Released under the MIT License, see included LICENSE file.
 */
 //-------------------------------------------------------------------------------
 
+import '../modules/third_party/lz-string.js';
+// import '../modules/third_party/levenshtein.js';
+// import '../modules/third_party/difflib-browser.js';
+import '../modules/globals.js';
+import '../modules/extractor.js';
+import '../modules/predictor.js';
+
 // local counters for debugging
 var debug_httpRemovalCounter = 0;
 var debug_httpsRemovalCounter = 0;
@@ -47,7 +54,7 @@ const regexKey = "~regex;";
 
 // indexed DB for cookie history
 var historyDB = undefined;
-const openDBRequest = window.indexedDB.open("CookieBlockHistory", 1);
+const openDBRequest = globalThis.indexedDB.open("CookieBlockHistory", 1);
 
 
 /**
@@ -438,14 +445,14 @@ const classifyCookie = async function(cookieDat, feature_input) {
     // Otherwise, perform prediction
     if (label === -1) {
         // Feature extraction timing
-        let startTime = window.performance.now();
+        let startTime = globalThis.performance.now();
         let features = extractFeatures(feature_input);
-        recordDebugTimings(window.performance.now() - startTime, 1);
+        recordDebugTimings(globalThis.performance.now() - startTime, 1);
 
         // Prediction timing
-        startTime = window.performance.now();
+        startTime = globalThis.performance.now();
         label = await predictClass(features, cblk_pscale);
-        recordDebugTimings(window.performance.now() - startTime, 2);
+        recordDebugTimings(globalThis.performance.now() - startTime, 2);
     } else {
         debug_Nskipped++;
     }
@@ -511,12 +518,12 @@ const makePolicyDecision = async function(cookieDat, label) {
                         // If failed again, report error.
                         console.error("Removal failed: Could not find cookie (%s;%s;%s) in storage. Assigned label: (%s)", cookieDat.name, cookieDat.domain, cookieDat.path, cName);
                     } else {
-                        //console.debug("Cookie (%s;%s;%s) with label (%s) has been removed successfully over HTTP protocol.", cookieDat.name, cookieDat.domain, cookieDat.path, cName);
+                        console.debug("Cookie (%s;%s;%s) with label (%s) has been removed successfully over HTTP protocol.", cookieDat.name, cookieDat.domain, cookieDat.path, cName);
                         debug_httpRemovalCounter += 1;
                     }
                 });
             } else {
-                //console.debug("Cookie (%s;%s;%s) with label (%s) has been removed successfully over HTTPS protocol.", cookieDat.name, cookieDat.domain, cookieDat.path, cName);
+                console.debug("Cookie (%s;%s;%s) with label (%s) has been removed successfully over HTTPS protocol.", cookieDat.name, cookieDat.domain, cookieDat.path, cName);
                 debug_httpsRemovalCounter += 1;
             }
         });
@@ -535,7 +542,7 @@ const makePolicyDecision = async function(cookieDat, label) {
     await maybeRestoreCBLKVar(cblk_mintime, "cblk_mintime");
     await maybeRestoreCBLKVar(cblk_pause, "cblk_pause");
 
-    let startTime = window.performance.now();
+    let startTime = globalThis.performance.now();
     // First, if consent is given, check if the cookie has already been stored.
     let serializedCookie, storedCookie;
     try {
@@ -556,7 +563,7 @@ const makePolicyDecision = async function(cookieDat, label) {
     }
 
     // Record debug timing for cookie retrieval
-    recordDebugTimings(window.performance.now() - startTime, 0);
+    recordDebugTimings(globalThis.performance.now() - startTime, 0);
     console.assert(serializedCookie !== undefined, "Cookie object was still undefined!");
 
     // Check if the domain is contained in the allowlist

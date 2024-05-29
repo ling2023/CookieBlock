@@ -70,6 +70,7 @@ getExtensionFile(chrome.runtime.getURL("/ext_data/model/forest_class3_part1.json
         }
     }
 }
+globalThis.traverseDecisionTree = traverseDecisionTree;
 
 /**
  * Asynchronous function that produces a total class score from a single forest.
@@ -81,6 +82,8 @@ const getForestScore = function(forest, features) {
     let treeScores = forest.map((root) => traverseDecisionTree(root, features));
     return treeScores.reduce((total, nv) => {return total + nv}, 0);
 }
+
+globalThis.getForestScore = getForestScore;
 
 
 /**
@@ -128,3 +131,5 @@ const predictClass = async function (features, nfactor){
 
     return minIndex;
 }
+
+globalThis.predictClass = predictClass;

@@ -22,6 +22,7 @@ const defaultIcon =
         "128": "/icons/cookieblock-128.png"
     }
 };
+globalThis.defaultIcon = defaultIcon;
 
 // CookieBlock icon in grayscale, when deactivated
 const grayScaleIcon =
@@ -36,8 +37,10 @@ const grayScaleIcon =
         "128": "/icons/gs-cookieblock-128.png"
     }
 };
+globalThis.grayScaleIcon = grayScaleIcon;
 
 const enableExtraOptions = false;
+globalThis.enableExtraOptions = enableExtraOptions;
 
 /**
  * Helper used to transform the local.storage.get callback into an async function.
@@ -55,6 +58,7 @@ const enableExtraOptions = false;
         });
     });
 }
+globalThis.chromeWorkaround = chromeWorkaround;
 
 /**
  * Helper function for storing content in sync or local storage.
@@ -80,6 +84,7 @@ const setStorageValue = async function(newValue, stType, key, override = true) {
         }
     }
 }
+globalThis.setStorageValue = setStorageValue
 
 
 /**
@@ -109,6 +114,7 @@ const setStorageValue = async function(newValue, stType, key, override = true) {
     }
     return value;
  }
+ globalThis.getStorageValue = getStorageValue;
 
 
 /**
@@ -119,28 +125,55 @@ const setStorageValue = async function(newValue, stType, key, override = true) {
 * @param {Function} callback   Callback function that will be executed as soon as the data is available, receives data as first argument.
 */
 const getExtensionFile = function(url, dtype, callback, errorCallback = null) {
-    const req = new XMLHttpRequest();
+    // const req = new XMLHttpRequest();
 
-    req.responseType = dtype;
-    req.onreadystatechange = function(event)
-    {
-        if (this.readyState === XMLHttpRequest.DONE)
-        {
-            if (this.status === 200) {
-                callback(this.response);
+    // req.responseType = dtype;
+    // req.onreadystatechange = function(event)
+    // {
+    //     if (this.readyState === XMLHttpRequest.DONE)
+    //     {
+    //         if (this.status === 200) {
+    //             callback(this.response);
+    //         }
+    //         else {
+    //             console.error("Error -- could not retrieve data at (%s): %d (%s)", url, this.status, this.statusText);
+    //             if (errorCallback){
+    //                 errorCallback(this.status);
+    //             }
+    //         }
+    //     }
+    // };
+
+    // req.open('GET', url, true);
+    // req.send(null);
+    console.log('url=', url, 'dtype=', dtype);
+    fetch(url)
+    .then(response => {
+        if (!response.ok) {
+            console.error("Error -- could not retrieve data at (%s): %d (%s)", url, response.status, response.statusText);
+            if (errorCallback) {
+                errorCallback(response.status);
             }
-            else {
-                console.error("Error -- could not retrieve data at (%s): %d (%s)", url, this.status, this.statusText);
-                if (errorCallback){
-                    errorCallback(this.status);
-                }
-            }
+            throw new Error('Network response was not ok.');
         }
-    };
 
-    req.open('GET', url, true);
-    req.send(null);
+        if (dtype == 'json')
+            return response.json();
+        else
+            return response.text();
+
+    })
+  .then(data => {
+    console.log('data=', data);
+    callback(data)
+})
+  .catch(error => {
+    console.log('error=', error);
+    console.error('Fetch Error :-S', error)
+});
+
 };
+globalThis.getExtensionFile = getExtensionFile;
 
 
 /**
@@ -154,6 +187,7 @@ const escapeString = function(str) {
     }
     return unescape(encodeURIComponent(str));
 }
+globalThis.escapeString = escapeString;
 
 
 /**
@@ -174,6 +208,7 @@ const urlToUniformDomain = function(url) {
     new_url = new_url.replace(/\/.*$/, "");
     return new_url;
 }
+globalThis.urlToUniformDomain = urlToUniformDomain;
 
 
  const domainRemoveNoise = function(url) {
@@ -187,6 +222,7 @@ const urlToUniformDomain = function(url) {
     new_url = new_url.replace(/\/.*$/, "");
     return new_url;
 }
+globalThis.domainRemoveNoise = domainRemoveNoise;
 
 
 /**
@@ -201,6 +237,7 @@ const urlToUniformDomain = function(url) {
         return urlToUniformDomain(domainOrURL);
     }
 }
+globalThis.cleanDomain = cleanDomain;
 
 /**
 * Given a cookie expiration date, compute the expiry time in seconds,
@@ -212,7 +249,7 @@ const datetimeToExpiry = function(cookie) {
     let curTS = Math.floor(Date.now() / 1000);
     return cookie.session ? 0 : cookie.expirationDate - curTS;
 };
-
+globalThis.datetimeToExpiry =datetimeToExpiry;
 
 /**
  * Transform class index to human-readable meaning.
@@ -231,6 +268,7 @@ const classIndexToString = (idx) => {
         default: return "Invalid Category Index"
     }
 }
+globalThis.classIndexToString = classIndexToString;
 
 /**
  * Helper function to assign static localization text to an element's textContent field.
@@ -246,8 +284,31 @@ const setStaticLocaleText = (elemID, locID, args=[]) => {
         console.error("Original Error Message: " + err.message)
     }
 };
+globalThis.setStaticLocaleText =setStaticLocaleText;
 
 
 // default configuration
-var defaultConfig = undefined;
+var defaultConfig = {};
 getExtensionFile(chrome.runtime.getURL("/ext_data/default_config.json"), "json", (df)=> {defaultConfig = df});
+
+
+// // export {getExtensionFile};
+// export {
+//     getExtensionFile,
+//     setStaticLocaleText,
+//     getStorageValue,
+//     setStorageValue,
+//     escapeString,
+// };
+
+globalThis.getExtensionFile = getExtensionFile;
+globalThis.setStaticLocaleText = setStaticLocaleText;
+globalThis.getStorageValue = getStorageValue;
+globalThis.setStorageValue = setStorageValue;
+globalThis.escapeString = escapeString;
+globalThis.datetimeToExpiry = datetimeToExpiry;
+// globalThis.getExtensionFile = getExtensionFile;
+// globalThis.getExtensionFile = getExtensionFile;
+// globalThis.getExtensionFile = getExtensionFile;
+// globalThis.getExtensionFile = getExtensionFile;
+// globalThis.getExtensionFile = getExtensionFile;

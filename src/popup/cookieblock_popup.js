@@ -8,6 +8,8 @@ Released under the MIT License, see included LICENSE file.
 */
 //-------------------------------------------------------------------------------
 
+
+
 const pauseCheckbox = document.getElementById("pause-check");
 const configButton = document.getElementById("config");
 const exceptionButton = document.getElementById("add-exception");
@@ -66,6 +68,9 @@ const popupSetup = async function() {
 
     chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
         let currentURL = tabs[0].url;
+        if (currentURL === undefined) {
+            return;
+        }
         exceptionButton.textContent = addText;
         if (currentURL.match(ignoredPages)){
             exceptionButton.disabled = true;

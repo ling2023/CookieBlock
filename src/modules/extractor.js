@@ -8,6 +8,7 @@ Released under the MIT License, see included LICENSE file.
 */
 //-------------------------------------------------------------------------------
 
+import './globals.js';
 
 // Loaded in from a JSON file, stores the configuration on which features to extract from a cookie
 var feature_config;
@@ -848,3 +849,5 @@ const extractFeatures = function(cookieDat) {
 
     return sparseFeatures;
 }
+
+globalThis.extractFeatures = extractFeatures;
